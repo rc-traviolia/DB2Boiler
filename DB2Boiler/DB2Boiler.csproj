@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.0.1</Version>
+    <Version>0.0.3</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>DB2Boiler</Title>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -12,7 +12,7 @@
     <Company>$(AssemblyName)</Company>
     <PackageIcon>boilingpoticon.png</PackageIcon>
     <Authors>Richard Traviolia</Authors>
-    <Description>Boilerplate code for creating CRUD enpoints in Azure Functions (isolated)</Description>
+    <Description>Boilerplate code for using DB2Connect with Azure Function Apps (isolated)</Description>
     <DebugType>embedded</DebugType>
     <PackageProjectUrl>https://github.com/rc-traviolia/DB2Boiler</PackageProjectUrl>
   </PropertyGroup>
@@ -27,6 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.19.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
+    <PackageReference Include="Net.IBM.Data.Db2" Version="6.0.0.400" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,5 +44,14 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+  
+  <Target Name="CopyFilesAfterBuild" AfterTargets="AfterBuild">
+    <Exec Command="(robocopy $(TargetDir)clidriver\ $(TargetDir)bin\clidriver /E) ^&amp; IF %25ERRORLEVEL%25 LSS 8 SET ERRORLEVEL = 0" />
+    <Copy SourceFiles="@(IbmDb2ConnectLicenseDsnConfigurationFile)" DestinationFolder="$(TargetDir)clidriver\cfg" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+  </Target>
+  <Target Name="CopyFilesAfterPublish" AfterTargets="Publish">
+    <Exec Command="(robocopy $(PublishDir)clidriver\ $(PublishDir)bin\clidriver /E) ^&amp; IF %25ERRORLEVEL%25 LSS 8 SET ERRORLEVEL = 0" />
+    <Copy SourceFiles="@(IbmDb2ConnectLicenseDsnConfigurationFile)" DestinationFolder="$(PublishDir)clidriver\cfg" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+  </Target>
 
 </Project>
