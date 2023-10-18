@@ -126,13 +126,20 @@ namespace DB2Boiler.QueryFactory
                     else
                     {
                         var initialResult = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query.ProcedureName, db2Query.GetParameters());
-                        var result = optionalListFunction(initialResult);
-                        var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
-                        await response.WriteAsJsonAsync(result);
-                        return response;
+                        if(initialResult.Count() == 0)
+                        {
+                            var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                            await response.WriteAsJsonAsync(initialResult);
+                            return response; 
+                        }
+                        else
+                        {
+                            var result = optionalListFunction(initialResult);
+                            var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                            await response.WriteAsJsonAsync(result);
+                            return response;
+                        }
                     }
-
-
                 }
                 else
                 {
