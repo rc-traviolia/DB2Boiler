@@ -47,6 +47,21 @@ namespace DB2Boiler.QueryFactory
             db2Query.Logger = logger;
             return db2Query;
         }
+        /// <summary>
+        /// The default is 30 seconds. Using this will override that default.
+        /// </summary>
+        /// <typeparam name="TResponseModel"></typeparam>
+        /// <typeparam name="TParameterModel"></typeparam>
+        /// <param name="db2Query"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public static DB2Query<TResponseModel, TParameterModel> UseCustomTimeout<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, int timeoutSeconds)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            db2Query.Timeout = timeoutSeconds;
+            return db2Query;
+        }
 
         public static async Task<HttpResponseData> GetSingleResultAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
@@ -118,14 +133,14 @@ namespace DB2Boiler.QueryFactory
                 {
                     if (optionalListFunction == null)
                     {
-                        var result = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query.ProcedureName, db2Query.GetParameters());
+                        var result = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query);
                         var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(result);
                         return response;
                     }
                     else
                     {
-                        var initialResult = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query.ProcedureName, db2Query.GetParameters());
+                        var initialResult = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query);
                         if(initialResult.Count() == 0)
                         {
                             var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
@@ -143,7 +158,7 @@ namespace DB2Boiler.QueryFactory
                 }
                 else
                 {
-                    var initialResult = await db2Query.DB2Service.DB2QuerySingle<TResponseModel>(db2Query.ProcedureName, db2Query.GetParameters());
+                    var initialResult = await db2Query.DB2Service.DB2QuerySingle<TResponseModel>(db2Query);
 
                     if (initialResult == null)
                     {

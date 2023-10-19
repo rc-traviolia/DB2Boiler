@@ -18,6 +18,7 @@ namespace DB2Boiler.QueryFactory
         public IDB2Service? DB2Service { get; set; }
         public ILogger? Logger { get; set; }
         public IDB2Parameters? Parameters {get; set;}
+        public int Timeout { get; set; }
 
         public DB2Query(string procedureName)
         {
@@ -25,6 +26,7 @@ namespace DB2Boiler.QueryFactory
             RequiredParameters = new List<string>();
             ParameterValues = new List<(string Name, string Value)>();
             Parameters = new TParameterModel();
+            Timeout = 30;
         }
 
         public List<DB2Parameter> GetParameters()

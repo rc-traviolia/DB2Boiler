@@ -1,10 +1,13 @@
 ﻿using DB2Boiler.Configuration;
 using DB2Boiler.Infrastructure;
+using DB2Boiler.QueryFactory;
 using DB2Boiler.Utilities;
 using IBM.Data.Db2;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Data;
+using System.Dynamic;
+using System.Runtime.CompilerServices;
 
 namespace DB2Boiler
 {
@@ -29,21 +32,27 @@ namespace DB2Boiler
 
         }
 
-        public async Task<TResponseModel?> DB2QuerySingle<TResponseModel>(string procedureName, List<DB2Parameter> parameterList) where TResponseModel : DB2ResultMappable, new()
+        public async Task<TResponseModel?> DB2QuerySingle<TResponseModel, TParameterModel>(DB2Query<TResponseModel, TParameterModel> db2Query)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
         {
-            var result = await DB2QueryMultiple<TResponseModel>(procedureName, parameterList);
+            var result = await DB2QueryMultiple(db2Query);
             return result.FirstOrDefault();
 
         }
 
-        public async Task<List<TResponseModel>> DB2QueryMultiple<TResponseModel>(string procedureName, List<DB2Parameter> parameterList) where TResponseModel : DB2ResultMappable, new()
+        
+        public async Task<List<TResponseModel>> DB2QueryMultiple<TResponseModel, TParameterModel>(DB2Query<TResponseModel, TParameterModel> db2Query)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
         {
+            var parameterList = db2Query.GetParameters();
             if (parameterList == null)
             {
                 throw new Exception("DB2QueryMultiple was called with null parameterList. You must provide some object reference, even if it has no p");
             }
 
-            var commandText = $"{_settings.LibraryName}.{procedureName}";
+            var commandText = $"{_settings.LibraryName}.{db2Query.ProcedureName}";
             var storedProcResults = new List<TResponseModel>();
             var outParametersPresent = false;
 
@@ -57,6 +66,8 @@ namespace DB2Boiler
 
                         command.CommandText = commandText;
                         command.CommandType = CommandType.StoredProcedure;
+                        command.CommandTimeout = db2Query.Timeout;
+
                         foreach (var parameter in parameterList)
                         {
                             command.Parameters.Add(parameter);
@@ -66,7 +77,7 @@ namespace DB2Boiler
                             }
                         }
 
-                        _logger.LogInformation($"Submitting {commandText} with Parameters:\n{parameterList.ToIndentedJson()}");
+                        _logger.LogInformation($"Submitting {commandText} with Parameters:\n{parameterList.ToJsonParameters()}");
 
                         if (!outParametersPresent)
                         {

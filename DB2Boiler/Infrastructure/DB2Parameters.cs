@@ -42,7 +42,10 @@ namespace DB2Boiler.Infrastructure
                     var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
                     newDb2Parameter.Direction = parameterDirectionAttribute.Direction;
                     newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
-                    newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                    if (parameterDirectionAttribute.Size != 0)
+                    {
+                        newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                    }
                     parameterList.Add(newDb2Parameter);
                 }
                 else
