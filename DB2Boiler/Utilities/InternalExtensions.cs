@@ -12,6 +12,11 @@ namespace DB2Boiler.Utilities
     {
         internal static string ToJsonParameters(this List<DB2Parameter> db2Parameters)
         {
+            if(db2Parameters.Count == 0)
+            {
+                return "{}";
+            }
+
             var stringBuilder = new StringBuilder();
             stringBuilder.Append('{');
             foreach (var db2Parameter in db2Parameters)

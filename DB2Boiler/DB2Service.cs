@@ -49,7 +49,7 @@ namespace DB2Boiler
             var parameterList = db2Query.GetParameters();
             if (parameterList == null)
             {
-                throw new Exception("DB2QueryMultiple was called with null parameterList. You must provide some object reference, even if it has no p");
+                throw new Exception("DB2QueryMultiple was called with null parameterList. You must provide some object reference, even if this query doesn't require parameters.");
             }
 
             var commandText = $"{_settings.LibraryName}.{db2Query.ProcedureName}";
@@ -109,7 +109,7 @@ namespace DB2Boiler
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Exception thrown while executing DB2QUery {_settings.LibraryName}.{db2Query.ProcedureName}");
+                _logger.LogError(ex, $"Exception thrown while executing DB2Query {_settings.LibraryName}.{db2Query.ProcedureName}");
             }
 
             return storedProcResults;
