@@ -133,14 +133,14 @@ namespace DB2Boiler.QueryFactory
                 {
                     if (optionalListFunction == null)
                     {
-                        var result = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query);
+                        var result = await db2Query.DB2Service.DB2QueryMultiple(db2Query);
                         var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(result);
                         return response;
                     }
                     else
                     {
-                        var initialResult = await db2Query.DB2Service.DB2QueryMultiple<TResponseModel>(db2Query);
+                        var initialResult = await db2Query.DB2Service.DB2QueryMultiple(db2Query);
                         if(initialResult.Count() == 0)
                         {
                             var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
@@ -158,7 +158,7 @@ namespace DB2Boiler.QueryFactory
                 }
                 else
                 {
-                    var initialResult = await db2Query.DB2Service.DB2QuerySingle<TResponseModel>(db2Query);
+                    var initialResult = await db2Query.DB2Service.DB2QuerySingle(db2Query);
 
                     if (initialResult == null)
                     {

@@ -109,7 +109,7 @@ namespace DB2Boiler
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Exception thrown while executing DB2QUery {_settings.LibraryName}.{procedureName}");
+                _logger.LogError(ex, $"Exception thrown while executing DB2QUery {_settings.LibraryName}.{db2Query.ProcedureName}");
             }
 
             return storedProcResults;
