@@ -31,6 +31,12 @@ namespace DB2Boiler
             }
 
         }
+        public DB2Query<TResponseModel, TParameterModel> CreateDB2Query<TResponseModel, TParameterModel>(string procedureName)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            return new DB2Query<TResponseModel, TParameterModel>(procedureName).UseDataService(this).UseLogger(_logger);
+        }
 
         public async Task<TResponseModel?> DB2QuerySingle<TResponseModel, TParameterModel>(DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()

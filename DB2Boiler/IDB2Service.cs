@@ -6,6 +6,10 @@ namespace DB2Boiler
 {
     public interface IDB2Service
     {
+        DB2Query<TResponseModel, TParameterModel> CreateDB2Query<TResponseModel, TParameterModel>(string procedureName)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new();
+
         Task<TResponseModel?> DB2QuerySingle<TResponseModel, TParameterModel>(DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new();

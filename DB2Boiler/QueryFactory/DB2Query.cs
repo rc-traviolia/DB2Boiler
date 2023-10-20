@@ -17,7 +17,7 @@ namespace DB2Boiler.QueryFactory
         public HttpRequestData? HttpRequestData { get; set; }
         public IDB2Service? DB2Service { get; set; }
         public ILogger? Logger { get; set; }
-        public IDB2Parameters? Parameters {get; set;}
+        public IDB2Parameters Parameters {get; set;}
         public int Timeout { get; set; }
 
         public DB2Query(string procedureName)
@@ -31,19 +31,10 @@ namespace DB2Boiler.QueryFactory
 
         public List<DB2Parameter> GetParameters()
         {
-            if (RequiredParameters.Count() == 0)
+            if (RequiredParameters.Count == 0 && ParameterValues.Count == 0)
             {
                 return new List<DB2Parameter>();
             }
-            if (HttpRequestData == null)
-            {
-                throw new InvalidOperationException("You need to provide an HttpRequestData by calling UseHttpRequestParameters().");
-            }
-            if (Parameters == null)
-            {
-                throw new InvalidOperationException("You need to provide an IDB2Parameters implementation by calling UseIDB2ParametersImplementation<>().");
-            }
-
 
             return Parameters.MapAndRetrieveParameters(HttpRequestData, ParameterValues);
         }

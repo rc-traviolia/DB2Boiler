@@ -9,10 +9,18 @@ namespace DB2Boiler.Infrastructure
 
     public abstract class DB2Parameters : IDB2Parameters
     {
-        public virtual List<DB2Parameter> MapAndRetrieveParameters(HttpRequestData httpRequestData, List<(string Name, string Value)> parameterValues)
+        public virtual List<DB2Parameter> MapAndRetrieveParameters(HttpRequestData? httpRequestData, List<(string Name, string Value)> parameterValues)
         {
-            MapHttpRequestDataToParameters(httpRequestData);
-            MapProvidedParameterValues(parameterValues);
+            if(httpRequestData != null)
+            {
+                MapHttpRequestDataToParameters(httpRequestData);
+            }
+
+            if(parameterValues.Count > 0)
+            {
+                MapProvidedParameterValues(parameterValues);
+            }
+
             return MapThisToListOfDB2Parameter();
         }
 

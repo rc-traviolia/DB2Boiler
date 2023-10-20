@@ -5,6 +5,14 @@ namespace DB2Boiler.Infrastructure
 {
     public interface IDB2Parameters
     {
-        List<DB2Parameter> MapAndRetrieveParameters(HttpRequestData httpRequestData, List<(string Name, string Value)> parameterValues);
+        List<DB2Parameter> MapAndRetrieveParameters(HttpRequestData? httpRequestData, List<(string Name, string Value)> parameterValues);
+    }
+
+    public class EmptyDB2Parameters : IDB2Parameters
+    {
+        public List<DB2Parameter> MapAndRetrieveParameters(HttpRequestData? httpRequestData, List<(string Name, string Value)> parameterValues)
+        {
+            return new List<DB2Parameter>();
+        }
     }
 }
