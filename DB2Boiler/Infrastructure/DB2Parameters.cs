@@ -46,14 +46,33 @@ namespace DB2Boiler.Infrastructure
             {
                 //Skip all non-DB2Param properties
                 var parameterDirectionAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
-                var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
-                newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
-                newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
-                if (parameterDirectionAttribute.Size != 0)
+                if(parameterDirectionAttribute!.Direction == ParameterDirection.Output)
                 {
-                    newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                    var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
+                    newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
+                    newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
+                    if (parameterDirectionAttribute.Size != 0)
+                    {
+                        newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                    }
+                    parameterList.Add(newDb2Parameter);
                 }
-                parameterList.Add(newDb2Parameter);
+                else
+                {
+                    if(parameter.GetValue(this, null) != null)
+                    {
+                        var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
+                        newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
+                        newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
+                        if (parameterDirectionAttribute.Size != 0)
+                        {
+                            newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                        }
+                        parameterList.Add(newDb2Parameter);
+                    }
+                    
+                }
+                
             }
             return parameterList;
         }

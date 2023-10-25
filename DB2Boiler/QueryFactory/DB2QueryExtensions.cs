@@ -108,12 +108,12 @@ namespace DB2Boiler.QueryFactory
         {
             if (db2Query.RequiredParameters.Count() > 0 && db2Query.HttpRequestData == null)
             {
-                throw new InvalidOperationException("You have required parameters, but no HttpRequestData to pull them from. You need to provide an HttpRequestData by calling UseHttpRequestParameters().");
+                throw new InvalidOperationException("You have required parameters, but no HttpRequestData to pull them from. You need to provide an HttpRequestData by calling UseHttpRequest().");
             }
 
             if (db2Query.DB2Service == null)
             {
-                throw new InvalidOperationException("You must provide an implementation of IDB2Service by calling UseHttpRequestParameters().");
+                throw new InvalidOperationException("You must provide an implementation of IDB2Service by calling UseHttpRequest().");
             }
 
             try
