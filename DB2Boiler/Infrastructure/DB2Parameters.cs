@@ -2,6 +2,7 @@
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Text.Json.Serialization;
 
 namespace DB2Boiler.Infrastructure
@@ -41,26 +42,18 @@ namespace DB2Boiler.Infrastructure
         public virtual List<DB2Parameter> MapThisToListOfDB2Parameter()
         {
             var parameterList = new List<DB2Parameter>();
-            foreach (var parameter in GetType().GetProperties().Where(parameter => parameter.GetValue(this, null) != null))
+            foreach (var parameter in GetType().GetProperties().Where(parameter => parameter.GetValue(this, null) != null || Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute)) != null))
             {
                 //Skip all non-DB2Param properties
                 var parameterDirectionAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
-                if (parameterDirectionAttribute != null)
+                var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
+                newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
+                newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
+                if (parameterDirectionAttribute.Size != 0)
                 {
-                    var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
-                    newDb2Parameter.Direction = parameterDirectionAttribute.Direction;
-                    newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
-                    if (parameterDirectionAttribute.Size != 0)
-                    {
-                        newDb2Parameter.Size = parameterDirectionAttribute.Size;
-                    }
-                    parameterList.Add(newDb2Parameter);
+                    newDb2Parameter.Size = parameterDirectionAttribute.Size;
                 }
-                else
-                {
-                    //TODO: use ILogger and log it as information
-                    Debug.WriteLine($"{parameter.Name} was skipped within MapThisToListOfDB2Parameter(). Decorate it with a DB2ParamAttribute to add it to a request");
-                }
+                parameterList.Add(newDb2Parameter);
             }
             return parameterList;
         }

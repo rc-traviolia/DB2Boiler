@@ -11,6 +11,13 @@ namespace DB2Boiler.QueryFactory
 {
     public static class DB2QueryExtensions
     {
+        public static DB2Query<TResponseModel, TParameterModel> AddParameterWithoutValue<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, string parameterName)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            db2Query.ParameterValues.Add(new(parameterName, null));
+            return db2Query;
+        }
         public static DB2Query<TResponseModel, TParameterModel> AddParameterWithValue<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, string parameterName, string parameterValue)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
@@ -25,7 +32,7 @@ namespace DB2Boiler.QueryFactory
             db2Query.RequiredParameters.Add(parameterToGuarantee);
             return db2Query;
         }
-        public static DB2Query<TResponseModel, TParameterModel> UseHttpRequestParameters<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, HttpRequestData httpRequestData)
+        public static DB2Query<TResponseModel, TParameterModel> UseHttpRequest<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, HttpRequestData httpRequestData)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
@@ -124,7 +131,7 @@ namespace DB2Boiler.QueryFactory
                 {
                     string reportString = $"Missing Required Parameters: {string.Join(", ", missingParameters.ToArray())}";
                     db2Query.Logger.LogError(new Exception(reportString), reportString);
-                    var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.BadRequest);
+                    var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.BadRequest);
                     response.WriteString(reportString);
                     return response;
                 }
@@ -134,7 +141,7 @@ namespace DB2Boiler.QueryFactory
                     if (optionalListFunction == null)
                     {
                         var result = await db2Query.DB2Service.DB2QueryMultiple(db2Query);
-                        var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(result);
                         return response;
                     }
@@ -143,14 +150,14 @@ namespace DB2Boiler.QueryFactory
                         var initialResult = await db2Query.DB2Service.DB2QueryMultiple(db2Query);
                         if(initialResult.Count() == 0)
                         {
-                            var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                             await response.WriteAsJsonAsync(initialResult);
                             return response; 
                         }
                         else
                         {
                             var result = optionalListFunction(initialResult);
-                            var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                             await response.WriteAsJsonAsync(result);
                             return response;
                         }
@@ -163,21 +170,21 @@ namespace DB2Boiler.QueryFactory
                     if (initialResult == null)
                     {
                         //return new OkObjectResult(new object());
-                        var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(new object());
                         return response;
                     }
 
                     if (optionalSingleFunction == null)
                     {
-                        var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(initialResult);
                         return response;
                     }
                     else
                     {
                         var result = optionalSingleFunction(initialResult);
-                        var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.OK);
+                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
                         await response.WriteAsJsonAsync(result);
                         return response;
                     }
@@ -185,7 +192,7 @@ namespace DB2Boiler.QueryFactory
             }
             catch (Exception ex)
             {
-                var response = db2Query.HttpRequestData.GuaranteeNotNull().CreateResponse(HttpStatusCode.BadRequest);
+                var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.BadRequest);
                 await response.WriteAsJsonAsync(ex);
                 return response;
             }
