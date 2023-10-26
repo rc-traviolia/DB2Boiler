@@ -48,9 +48,9 @@ namespace DB2Boiler.Infrastructure
                 var parameterDirectionAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
                 if(parameterDirectionAttribute!.Direction == ParameterDirection.Output)
                 {
-                    var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
+
+                    var newDb2Parameter = new DB2Parameter(parameter.Name, parameterDirectionAttribute.DB2Type);
                     newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
-                    newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
                     if (parameterDirectionAttribute.Size != 0)
                     {
                         newDb2Parameter.Size = parameterDirectionAttribute.Size;
