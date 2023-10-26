@@ -1,7 +1,9 @@
 ﻿using IBM.Data.Db2;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text.Json.Serialization;
 
@@ -15,6 +17,7 @@ namespace DB2Boiler.Infrastructure
             if(httpRequestData != null)
             {
                 MapHttpRequestDataToParameters(httpRequestData);
+                ActivateParametersWithValues();
             }
 
             if(parameterValues.Count > 0)
@@ -23,6 +26,18 @@ namespace DB2Boiler.Infrastructure
             }
 
             return MapThisToListOfDB2Parameter();
+        }
+
+        private void ActivateParametersWithValues()
+        {
+            foreach (var parameter in GetType().GetProperties())
+            {
+                if (parameter.GetValue(this, null) != null)
+                {
+                    var attribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
+                    attribute!.Activated = true;
+                }
+            }
         }
 
         public abstract void MapHttpRequestDataToParameters(HttpRequestData httpRequestData);
@@ -35,6 +50,8 @@ namespace DB2Boiler.Infrastructure
                     if (parameterValue.Name == parameter.Name)
                     {
                         parameter.SetValue(this, parameterValue.Value);
+                        var attribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
+                        attribute!.Activated = true;
                     }
                 }
             }
@@ -42,39 +59,35 @@ namespace DB2Boiler.Infrastructure
         public virtual List<DB2Parameter> MapThisToListOfDB2Parameter()
         {
             var parameterList = new List<DB2Parameter>();
-            foreach (var parameter in GetType().GetProperties().Where(parameter => parameter.GetValue(this, null) != null || Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute)) != null))
+            foreach (var parameter in GetType().GetProperties().Where(parameter => Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute)) != null))
             {
-                //Skip all non-DB2Param properties
-                var parameterDirectionAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
-                if(parameterDirectionAttribute!.Direction == ParameterDirection.Output)
+                var db2ParameterAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
+                if (db2ParameterAttribute!.Activated)
                 {
-
-                    var newDb2Parameter = new DB2Parameter(parameter.Name, parameterDirectionAttribute.DB2Type);
-                    newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
-                    if (parameterDirectionAttribute.Size != 0)
+                    if (db2ParameterAttribute!.Direction == ParameterDirection.Output)
                     {
-                        newDb2Parameter.Size = parameterDirectionAttribute.Size;
+                        parameterList.Add(CreateParameter(parameter, db2ParameterAttribute, ""));
                     }
-                    parameterList.Add(newDb2Parameter);
-                }
-                else
-                {
-                    if(parameter.GetValue(this, null) != null)
+                    else
                     {
-                        var newDb2Parameter = new DB2Parameter(parameter.Name, parameter.GetValue(this, null));
-                        newDb2Parameter.Direction = parameterDirectionAttribute!.Direction;
-                        newDb2Parameter.DB2Type = parameterDirectionAttribute.DB2Type;
-                        if (parameterDirectionAttribute.Size != 0)
-                        {
-                            newDb2Parameter.Size = parameterDirectionAttribute.Size;
-                        }
-                        parameterList.Add(newDb2Parameter);
+                        parameterList.Add(CreateParameter(parameter, db2ParameterAttribute));
                     }
-                    
                 }
-                
             }
             return parameterList;
+        }
+
+        public virtual DB2Parameter CreateParameter(PropertyInfo propertyInfo, DB2ParamAttribute db2ParamAttribute, string? defaultValue = null)
+        {
+            var newDB2Parameter = new DB2Parameter(propertyInfo!.Name, defaultValue ?? propertyInfo.GetValue(this, null));
+            newDB2Parameter.Direction = db2ParamAttribute!.Direction;
+            newDB2Parameter.DB2Type = db2ParamAttribute.DB2Type;
+            if (db2ParamAttribute.Size != 0)
+            {
+                newDB2Parameter.Size = db2ParamAttribute.Size;
+            }
+
+            return newDB2Parameter;
         }
     }
 }

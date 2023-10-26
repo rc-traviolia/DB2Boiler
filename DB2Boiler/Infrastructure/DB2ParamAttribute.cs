@@ -13,12 +13,13 @@ namespace DB2Boiler.Infrastructure
         public ParameterDirection Direction { get; set; }
         public DB2Type DB2Type { get; set; }
         public int Size { get; set; }
-
+        public bool Activated { get; set; }
         public DB2ParamAttribute(ParameterDirection direction, DB2Type db2Type, int size = 0)
         {
             Direction = direction;
             DB2Type = db2Type;
             Size = size;
+            Activated = false;
         }
     }
 }
