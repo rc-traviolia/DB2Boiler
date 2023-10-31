@@ -59,19 +59,12 @@ namespace DB2Boiler.Infrastructure
         public virtual List<DB2Parameter> MapThisToListOfDB2Parameter()
         {
             var parameterList = new List<DB2Parameter>();
-            foreach (var parameter in GetType().GetProperties().Where(parameter => Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute)) != null))
+            foreach (var parameter in GetType().GetProperties().Where(p => p.GetValue(this, null) != null))
             {
                 var db2ParameterAttribute = (DB2ParamAttribute?)Attribute.GetCustomAttribute(parameter, typeof(DB2ParamAttribute));
-                if (db2ParameterAttribute!.Activated)
+                if (db2ParameterAttribute != null)
                 {
-                    if (db2ParameterAttribute!.Direction == ParameterDirection.Output)
-                    {
-                        parameterList.Add(CreateParameter(parameter, db2ParameterAttribute, ""));
-                    }
-                    else
-                    {
-                        parameterList.Add(CreateParameter(parameter, db2ParameterAttribute));
-                    }
+                    parameterList.Add(CreateParameter(parameter, db2ParameterAttribute));
                 }
             }
             return parameterList;

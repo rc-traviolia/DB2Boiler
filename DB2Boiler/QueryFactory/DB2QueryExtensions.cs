@@ -15,7 +15,7 @@ namespace DB2Boiler.QueryFactory
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
-            db2Query.ParameterValues.Add(new(parameterName, null));
+            db2Query.ParameterValues.Add(new(parameterName, ""));
             return db2Query;
         }
         public static DB2Query<TResponseModel, TParameterModel> AddParameterWithValue<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, string parameterName, string parameterValue)
@@ -70,37 +70,74 @@ namespace DB2Boiler.QueryFactory
             return db2Query;
         }
 
+        /*OLD METHODS START*/
+        [Obsolete("Deprecating this method name. Use GetSingleHttpResponseDataAsync() instead.")]
         public static async Task<HttpResponseData> GetSingleResultAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
-            return await db2Query.GetResultAsync(DB2ResultType.Single, (responseModelResponse) => { return responseModelResponse; }, null);
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.Single, (responseModelResponse) => { return responseModelResponse; }, null);
         }
 
+        [Obsolete("Deprecating this method name. Use GetListHttpResponseDataAsync() instead.")]
         public static async Task<HttpResponseData> GetListResultAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
-            return await db2Query.GetResultAsync(DB2ResultType.List, null, (responseModelResponse) => { return responseModelResponse; });
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.List, null, (responseModelResponse) => { return responseModelResponse; });
         }
 
+        [Obsolete("Deprecating this method name. Use GetSingleHttpResponseDataAsync() instead.")]
         public static async Task<HttpResponseData> GetSingleResultAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
             Func<TResponseModel, TReplacementResponseModel>? optionalFunction = null)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
-            return await db2Query.GetResultAsync(DB2ResultType.Single, optionalFunction, null);
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.Single, optionalFunction, null);
         }
 
+        [Obsolete("Deprecating this method name. Use GetListHttpResponseDataAsync() instead.")]
         public static async Task<HttpResponseData> GetListResultAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
             Func<List<TResponseModel>, TReplacementResponseModel>? optionalFunction = null)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
-            return await db2Query.GetResultAsync(DB2ResultType.List, null, optionalFunction);
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.List, null, optionalFunction);
+        }
+        /*OLD METHODS END*/
+
+        /*NEW METHODS START*/
+        public static async Task<HttpResponseData> GetSingleHttpResponseDataAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.Single, (responseModelResponse) => { return responseModelResponse; }, null);
         }
 
-        private static async Task<HttpResponseData> GetResultAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, DB2ResultType dB2ResultType,
+        public static async Task<HttpResponseData> GetListHttpResponseDataAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.List, null, (responseModelResponse) => { return responseModelResponse; });
+        }
+
+        public static async Task<HttpResponseData> GetSingleHttpResponseDataAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
+            Func<TResponseModel, TReplacementResponseModel>? optionalFunction = null)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.Single, optionalFunction, null);
+        }
+
+        public static async Task<HttpResponseData> GetListHttpResponseDataAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
+            Func<List<TResponseModel>, TReplacementResponseModel>? optionalFunction = null)
+            where TResponseModel : DB2ResultMappable, new()
+            where TParameterModel : IDB2Parameters, new()
+        {
+            return await db2Query.GetHttpResponseDataAsync(DB2ResultType.List, null, optionalFunction);
+        }
+        /*NEW METHODS END*/
+        private static async Task<HttpResponseData> GetHttpResponseDataAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, DB2ResultType dB2ResultType,
             Func<TResponseModel, TReplacementResponseModel>? optionalSingleFunction,
             Func<List<TResponseModel>, TReplacementResponseModel>? optionalListFunction)
             where TResponseModel : DB2ResultMappable, new()
@@ -113,7 +150,7 @@ namespace DB2Boiler.QueryFactory
 
             if (db2Query.DB2Service == null)
             {
-                throw new InvalidOperationException("You must provide an implementation of IDB2Service by calling UseHttpRequest().");
+                throw new InvalidOperationException("You must provide an implementation of IDB2Service. You can use the default one by calling AddDB2Service() in Program.cs.");
             }
 
             try
