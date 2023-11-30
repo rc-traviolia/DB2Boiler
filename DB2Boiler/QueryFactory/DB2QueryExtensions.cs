@@ -72,7 +72,7 @@ namespace DB2Boiler.QueryFactory
 
         /*OLD METHODS START*/
         [Obsolete("Deprecating this method name. Use GetSingleHttpResponseDataAsync() instead.")]
-        public static async Task<HttpResponseData> GetSingleResultAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
+        public static async Task<HttpResponseData> GetSingleResult<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
@@ -80,7 +80,7 @@ namespace DB2Boiler.QueryFactory
         }
 
         [Obsolete("Deprecating this method name. Use GetListHttpResponseDataAsync() instead.")]
-        public static async Task<HttpResponseData> GetListResultAsync<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
+        public static async Task<HttpResponseData> GetListResult<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
         {
@@ -88,7 +88,7 @@ namespace DB2Boiler.QueryFactory
         }
 
         [Obsolete("Deprecating this method name. Use GetSingleHttpResponseDataAsync() instead.")]
-        public static async Task<HttpResponseData> GetSingleResultAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
+        public static async Task<HttpResponseData> GetSingleResult<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
             Func<TResponseModel, TReplacementResponseModel>? optionalFunction = null)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
@@ -97,7 +97,7 @@ namespace DB2Boiler.QueryFactory
         }
 
         [Obsolete("Deprecating this method name. Use GetListHttpResponseDataAsync() instead.")]
-        public static async Task<HttpResponseData> GetListResultAsync<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
+        public static async Task<HttpResponseData> GetListResult<TResponseModel, TParameterModel, TReplacementResponseModel>(this DB2Query<TResponseModel, TParameterModel> db2Query,
             Func<List<TResponseModel>, TReplacementResponseModel>? optionalFunction = null)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new()
@@ -185,38 +185,30 @@ namespace DB2Boiler.QueryFactory
                     else
                     {
                         var initialResult = await db2Query.DB2Service.DB2QueryMultiple(db2Query);
-                        if(initialResult.Count() == 0)
-                        {
-                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
-                            await response.WriteAsJsonAsync(initialResult);
-                            return response; 
-                        }
-                        else
-                        {
-                            var result = optionalListFunction(initialResult);
-                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
-                            await response.WriteAsJsonAsync(result);
-                            return response;
-                        }
+                        var result = optionalListFunction(initialResult);
+                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
+                        await response.WriteAsJsonAsync(result);
+                        return response;
                     }
                 }
                 else
                 {
                     var initialResult = await db2Query.DB2Service.DB2QuerySingle(db2Query);
-
-                    if (initialResult == null)
-                    {
-                        //return new OkObjectResult(new object());
-                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
-                        await response.WriteAsJsonAsync(new object());
-                        return response;
-                    }
-
                     if (optionalSingleFunction == null)
                     {
-                        var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
-                        await response.WriteAsJsonAsync(initialResult);
-                        return response;
+                        if (initialResult == null)
+                        {
+                            //return new OkObjectResult(new object());
+                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
+                            await response.WriteAsJsonAsync(new object());
+                            return response;
+                        }
+                        else
+                        {
+                            var response = db2Query.HttpRequestData!.CreateResponse(HttpStatusCode.OK);
+                            await response.WriteAsJsonAsync(initialResult);
+                            return response;
+                        }
                     }
                     else
                     {
