@@ -102,13 +102,12 @@ namespace DB2Boiler
                         }
                         else
                         {
-                            var reader = await command.ExecuteReaderAsync();
+                            await command.ExecuteNonQueryAsync();
 
                             var newRecord = new TResponseModel();
                             newRecord.GetDataFromOutputParameters(command);
                             storedProcResults.Add(newRecord);
 
-                            await reader.CloseAsync();
                         }
                     }
                 }
