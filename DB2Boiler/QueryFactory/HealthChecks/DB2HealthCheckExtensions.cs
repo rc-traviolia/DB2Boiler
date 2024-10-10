@@ -8,27 +8,21 @@ namespace DB2Boiler.QueryFactory.HealthChecks
 {
     public static class DB2HealthCheckExtensions
     {
-        public static DB2Query<TResponseModel, TParameterModel> UseHttpRequest<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, HttpRequestData httpRequestData)
-            where TResponseModel : DB2ResultMappable, new()
-            where TParameterModel : IDB2Parameters, new()
+        public static DB2HealthCheck UseHttpRequest(this DB2HealthCheck db2HealthCheck, HttpRequestData httpRequestData)
         {
-            db2Query.HttpRequestData = httpRequestData;
-            return db2Query;
+            db2HealthCheck.HttpRequestData = httpRequestData;
+            return db2HealthCheck;
         }
-        public static DB2Query<TResponseModel, TParameterModel> UseDataService<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, IDB2Service dataService)
-            where TResponseModel : DB2ResultMappable, new()
-            where TParameterModel : IDB2Parameters, new()
+        public static DB2HealthCheck UseDataService(this DB2HealthCheck db2HealthCheck, IDB2Service dataService)
         {
-            db2Query.DB2Service = dataService;
-            return db2Query;
+            db2HealthCheck.DB2Service = dataService;
+            return db2HealthCheck;
         }
 
-        public static DB2Query<TResponseModel, TParameterModel> UseLogger<TResponseModel, TParameterModel>(this DB2Query<TResponseModel, TParameterModel> db2Query, ILogger logger)
-            where TResponseModel : DB2ResultMappable, new()
-            where TParameterModel : IDB2Parameters, new()
+        public static DB2HealthCheck UseLogger(this DB2HealthCheck db2HealthCheck, ILogger logger)
         {
-            db2Query.Logger = logger;
-            return db2Query;
+            db2HealthCheck.Logger = logger;
+            return db2HealthCheck;
         }
 
         private static async Task<HttpResponseData> GetHttpResponseData(this DB2HealthCheck db2HealthCheck)
