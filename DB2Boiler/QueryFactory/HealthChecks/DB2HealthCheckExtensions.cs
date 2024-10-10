@@ -25,7 +25,7 @@ namespace DB2Boiler.QueryFactory.HealthChecks
             return db2HealthCheck;
         }
 
-        private static async Task<HttpResponseData> GetHttpResponseData(this DB2HealthCheck db2HealthCheck)
+        public static async Task<HttpResponseData> GetHealthCheckResult(this DB2HealthCheck db2HealthCheck)
         {
             try
             {
