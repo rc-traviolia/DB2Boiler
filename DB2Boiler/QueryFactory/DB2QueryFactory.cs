@@ -1,4 +1,7 @@
 ﻿using DB2Boiler.Infrastructure;
+using DB2Boiler.QueryFactory.HealthChecks;
+using IBM.Data.Db2;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace DB2Boiler.QueryFactory
 {
@@ -9,6 +12,11 @@ namespace DB2Boiler.QueryFactory
             where TParameterModel : IDB2Parameters, new()
         {
             return new DB2Query<TResponseModel, TParameterModel>(procedureName);
+        }
+
+        public static DB2HealthCheck CreateDB2HealthCheck()
+        {
+            return new DB2HealthCheck();
         }
     }
 }

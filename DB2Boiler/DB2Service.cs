@@ -3,6 +3,7 @@ using DB2Boiler.Infrastructure;
 using DB2Boiler.QueryFactory;
 using DB2Boiler.Utilities;
 using IBM.Data.Db2;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Data;
@@ -119,6 +120,15 @@ namespace DB2Boiler
             }
 
             return storedProcResults;
+        }
+
+        public async Task PerformHealthCheck()
+        {
+            using (var connection = new DB2Connection(_settings.ConnectionString))
+            {
+                await connection.OpenAsync();
+                await connection.CloseAsync();
+            }
         }
     }
 }

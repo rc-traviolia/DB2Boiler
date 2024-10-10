@@ -1,6 +1,7 @@
 ﻿using DB2Boiler.Infrastructure;
 using DB2Boiler.QueryFactory;
 using IBM.Data.Db2;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace DB2Boiler
 {
@@ -17,5 +18,7 @@ namespace DB2Boiler
         Task<List<TResponseModel>> DB2QueryMultiple<TResponseModel, TParameterModel>(DB2Query<TResponseModel, TParameterModel> db2Query)
             where TResponseModel : DB2ResultMappable, new()
             where TParameterModel : IDB2Parameters, new();
+
+        Task PerformHealthCheck();
     }
 }
