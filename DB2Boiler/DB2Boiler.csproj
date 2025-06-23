@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>8.0.3</Version>
+    <Version>8.0.5</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>DB2Boiler</Title>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -25,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.19.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
-    <PackageReference Include="Net.IBM.Data.Db2" Version="6.0.0.400" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.23.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+    <PackageReference Include="Net.IBM.Data.Db2" Version="8.0.0.300" />
   </ItemGroup>
 
   <ItemGroup>

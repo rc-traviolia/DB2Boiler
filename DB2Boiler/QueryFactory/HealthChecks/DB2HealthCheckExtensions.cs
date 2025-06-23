@@ -40,7 +40,7 @@ namespace DB2Boiler.QueryFactory.HealthChecks
                 }
 
                 var response = db2HealthCheck.HttpRequestData!.CreateResponse(HttpStatusCode.InternalServerError);
-                await response.WriteAsJsonAsync(ex);
+                await response.WriteAsJsonAsync(ex.Message);
                 return response;
             }
         }
